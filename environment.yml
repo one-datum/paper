@@ -1,5 +1,5 @@
 channels:
-  - defaults
+  - conda-forge
 dependencies:
   - numpy>=1.20
   - pip>=20.3.3
