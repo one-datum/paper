@@ -8,7 +8,7 @@ TEMPORARIES      = src/ms.pdf src/__latexindent*.tex
 CONDA           := $(shell conda -V 2&> /dev/null && echo 1 || echo 0)
 SNAKEMAKE       := $(shell snakemake -v 2&> /dev/null && echo 1 || echo 0)
 SHOWYOURWORK    := $(shell test -f showyourwork/LICENSE && echo 1 || echo 0)
-.PHONY: ms.pdf clean report dag snakemake_setup conda_setup showyourwork_setup Makefile
+.PHONY: ms.pdf clean report dag snakemake_setup conda_setup showyourwork_setup Makefile hi
 
 
 # Default target: generate the article
@@ -59,3 +59,6 @@ dag: snakemake_setup showyourwork_setup
 # Catch-all target: route all unknown targets to Snakemake
 %: Makefile snakemake_setup showyourwork_setup
 	@snakemake $(SNAKEMAKEOPTS) $@
+
+hi:
+	echo "hi"
