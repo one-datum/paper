@@ -1,6 +1,6 @@
 # User config
 configfile: "showyourwork.yml"
-    
+
 # Import the showyourwork module
 module showyourwork:
     snakefile:
@@ -9,4 +9,4 @@ module showyourwork:
         config
 
 # Use all default rules
-use rule * from showyourwork  
+use rule * from showyourwork
