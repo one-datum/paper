@@ -106,6 +106,7 @@ svi_result = svi.run(
     20_000,
     num_transit,
     statistic=(num_transit - 1) * sample_variance,
+    progress_bar=False,
 )
 # -
 
