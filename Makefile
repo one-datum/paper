@@ -28,7 +28,7 @@ conda_setup:
 snakemake_setup: conda_setup
 	@if [ "$(SNAKEMAKE)" = "0" ]; then \
 		echo "Snakemake not found. Installing it using conda...";\
-		conda install -c defaults -c conda-forge -c bioconda mamba snakemake;\
+		conda install -c defaults -c conda-forge -c bioconda mamba snakemake-minimal;\
 	fi
 
 

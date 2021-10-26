@@ -2,7 +2,9 @@ channels:
   - conda-forge
 dependencies:
   - numpy>=1.20
+  - matplotlib
+  - scipy
   - pip>=20.3.3
   - python=3.9
   - pip:
-      - matplotlib>=3.3.3
+      - numpyro-ncx2
