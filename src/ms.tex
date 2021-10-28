@@ -43,7 +43,7 @@
 	\emph{(1)} We build a flexible data-driven model to estimate \Gaia's intrinsic per-transit RV uncertainty as a function of color and apparent magnitude.
 	\emph{(2)} Using these estimates, we develop a procedure for quantifying the likelihood that a given RV target is an unresolved multiple-star system, and compute apply this procedure to all targets with at least 3 RV transits in EDR3.
 	\emph{(3)} Finally, we derive a physical model for inferring the orbital parameters of the binary system based only on the published RV error, the number of RV transits, and the observational baseline.
-	These parameters are generally only weakly constrained, with the exception of the RV semi-amplitude, which can typically be estimated with a precision of $\sim PPP\%$.
+	These parameters are generally only weakly constrained, except for the RV semi-amplitude, which can typically be estimated with a precision of $\sim PPP\%$.
 	To demonstrate the reliability of this method and quantify its completeness, we apply our method to simulated data and catalogs of previously known spectroscopic binaries.
 	We expect that this value-added catalog will be useful for population studies of binary star systems, target selection for precise RV surveys, vetting exoplanet discoveries, and other applications.
 \end{abstract}
@@ -51,23 +51,6 @@
 \keywords{Astrostatistics (1882) --- Binary stars (154) --- Radial velocity (1332)}
 
 \section{Introduction} \label{sec:intro}
-
-\begin{figure}
-    \begin{centering}
-        \includegraphics{figures/infer_sigma_data.pdf}
-        \caption{A figure.}
-        \label{fig:infer_sigma:data}
-    \end{centering}
-\end{figure}
-
-\begin{figure}
-    \begin{centering}
-        \includegraphics{figures/infer_sigma.pdf}
-        \caption{A figure.}
-        \label{fig:infer_sigma:results}
-    \end{centering}
-\end{figure}
-
 
 By the end of the \Gaia\ Mission, it will discover SOME LARGE NUMBER of exoplanet and multiple star systems based on time resolved astrometry and radial velocities of many targets.
 In the meantime, we only have static measurements of the radial velocity, but it turns out that there is still information in the existing public facing catalog to place constraints on the orbital parameters of multiple systems using the \Gaia\ data.
@@ -95,12 +78,12 @@ The RV error $\epsilon_n$ for a target $n$ is computed as \citep{Katz19}
 where
 \begin{eqnarray}
 	\label{eq:sample-var}
-	{s_n}^2 = \frac{1}{N-1}\sum_{t=1}^{T_n} \left(v_{n,t} - \bar{v}_n\right)^2
+	{s_n}^2 = \frac{1}{T_n-1}\sum_{t=1}^{T_n} \left(v_{n,t} - \bar{v}_n\right)^2
 \end{eqnarray}
 is the sample variance of the individual RV measurements $v_{n,t}$.
 In \autoref{eq:sample-var}, $t=1,\cdots,T_n$ indexes the $T_n$ transits for target $n$ and
 \begin{eqnarray}
-	\bar{v}_n = \frac{1}{N}\sum_{t=1}^{T_n} v_{n,t}
+	\bar{v}_n = \frac{1}{T_n}\sum_{t=1}^{T_n} v_{n,t}
 \end{eqnarray}
 is the mean RV.
 In all that follows, it is much simpler to reason about the sample variance ${s_n}^2$ instead of the error on the median ${\epsilon}_n$, but that isn't a problem because we can compute
@@ -109,9 +92,64 @@ In all that follows, it is much simpler to reason about the sample variance ${s_
 \end{eqnarray}
 for any target, using only values available in the catalog: $\epsilon_n$ and $T_n$.
 
+Now, for a given target $n$, in the absence of any excess radial velocity signal, and if we know it's per-transit radial velocity measurement uncertainty $\sigma_n$, we would expect the quantity
+\begin{eqnarray}
+	\frac{(T_n - 1)\,s_n^2}{{\sigma_n}^2}
+\end{eqnarray}
+to be chi-squared distributed with $T_n - 1$ degrees of freedom.
+
 With this out of the way, the basic intuition underlying the methods discussed below is that, for a given target $n$, if we know the number of RV transits $T_n$ and the per-transit RV uncertainty $\sigma_n$, we can estimate the sampling distribution for ${s_n}^2$.
 
+\begin{figure}
+	\begin{centering}
+		\includegraphics{figures/infer_sigma_data.pdf}
+		\caption{A figure.}
+		\label{fig:infer_sigma:data}
+	\end{centering}
+\end{figure}
+
+\begin{figure}
+	\begin{centering}
+		\includegraphics{figures/infer_sigma.pdf}
+		\caption{A figure.}
+		\label{fig:infer_sigma:results}
+	\end{centering}
+\end{figure}
+
 \section{Estimating the per-transit radial velocity precision}\label{sec:noise}
+
+\begin{figure}
+	\begin{centering}
+		\includegraphics{figures/noise_model.pdf}
+		\caption{A figure.}
+		\label{fig:noise_model}
+	\end{centering}
+\end{figure}
+
+\begin{figure}
+	\begin{centering}
+		\includegraphics{figures/sigma_cmd.pdf}
+		\caption{A figure.}
+		\label{fig:sigma_cmd}
+	\end{centering}
+\end{figure}
+
+\begin{figure}
+	\begin{centering}
+		\includegraphics{figures/binary_fraction_cmd.pdf}
+		\caption{A figure.}
+		\label{fig:binary_fraction_cmd}
+	\end{centering}
+\end{figure}
+
+\begin{figure}
+	\begin{centering}
+		\includegraphics{figures/completeness.pdf}
+		\caption{A figure.}
+		\label{fig:completeness}
+	\end{centering}
+\end{figure}
+
 
 A key element of our analysis is that we must make a reasonably accurate estimate of the per-transit radial velocity measurement uncertainty.
 The \Gaia\ pipeline does not release a public estimate of this, but it can be estimated from the data in the public catalog.
@@ -254,8 +292,8 @@ We use an approximate broken power-law model for the number of radial velocity t
 \begin{eqnarray}
 	\label{eq:nb-transits}
 	p(T_n) &\propto& \left\{\begin{array}{ll}
-	1                                  & T_n < T_\mathrm{break} \\
-	(T_n / T_\mathrm{break})^{-\alpha} & \mathrm{otherwise}
+		1                                  & T_n < T_\mathrm{break} \\
+		(T_n / T_\mathrm{break})^{-\alpha} & \mathrm{otherwise}
 	\end{array} \right.
 \end{eqnarray}
 where the parameters are set to approximately match the observed distribution.
@@ -372,7 +410,7 @@ See \autoref{fig:noise_model}.
 % \end{figure}
 
 \begin{acknowledgments}
-The authors would like to thank the Astronomical Data Group at Flatiron for listening to every iteration of this project and for providing great feedback every step of the way.
+	The authors would like to thank the Astronomical Data Group at Flatiron for listening to every iteration of this project and for providing great feedback every step of the way.
 \end{acknowledgments}
 
 \vspace{5mm}

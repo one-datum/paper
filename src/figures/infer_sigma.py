@@ -15,10 +15,9 @@
 
 # Simulate some fake data:
 
-import matplotlib.pyplot as plt
-
 # +
 import numpy as np
+import matplotlib.pyplot as plt
 
 random = np.random.default_rng(5430)
 

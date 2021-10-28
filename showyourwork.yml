@@ -1,2 +1,12 @@
 # User configuration; see the docs for details!
 verbose: true
+
+dependencies:
+  src/figures/noise_model.py:
+    - src/archive/noise/process.fits
+  src/figures/sigma_cmd.py:
+    - src/archive/inference/inferred.fits.gz
+  src/figures/binary_fraction_cmd.py:
+    - src/archive/inference/inferred.fits.gz
+  src/figures/completeness.py:
+    - src/archive/simulations/inferred.fits.gz
