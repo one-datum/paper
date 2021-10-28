@@ -10,3 +10,7 @@ dependencies:
     - src/archive/inference/inferred.fits.gz
   src/figures/completeness.py:
     - src/archive/simulations/inferred.fits.gz
+
+arxiv_tarball_exclude:
+  - "**/archive/**/*"
+  - "**/*.zip"
