@@ -1,6 +1,6 @@
 # Default Snakemake options. Change here or override by setting
 # an environment variable as needed.
-SNAKEMAKEOPTS   ?= -c1
+SNAKEMAKEOPTS   ?= -c1 --use-conda
 
 
 # Local vars
