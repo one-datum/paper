@@ -41,8 +41,8 @@
 	In this paper, we demonstrate that the published RV error estimates can provide evidence for the existence of an unresolved stellar companion and, under the assumption of a gravitationally-bound binary system, place constraints its orbital parameters.
 	This paper makes three key contributions:
 	\emph{(1)} We build a flexible data-driven model to estimate \Gaia's intrinsic per-transit RV uncertainty as a function of color and apparent magnitude.
-	\emph{(2)} Using these estimates, we develop a procedure for quantifying the likelihood that a given RV target is an unresolved multiple-star system, and compute apply this procedure to all targets with at least 3 RV transits in EDR3.
-	\emph{(3)} Finally, we derive a physical model for inferring the orbital parameters of the binary system based only on the published RV error, the number of RV transits, and the observational baseline.
+	\emph{(2)} Using these estimates, we develop a procedure for detecting likely unresolved multiple star systems, and apply this procedure to all targets observed at least 3 times in EDR3.
+	\emph{(3)} Finally, we derive a physical model for constraining the orbital parameters of a binary system that would be consistent with the observed RV error and number of RV measurements.
 	These parameters are generally only weakly constrained, except for the RV semi-amplitude, which can typically be estimated with a precision of $\sim PPP\%$.
 	To demonstrate the reliability of this method and quantify its completeness, we apply our method to simulated data and catalogs of previously known spectroscopic binaries.
 	We expect that this value-added catalog will be useful for population studies of binary star systems, target selection for precise RV surveys, vetting exoplanet discoveries, and other applications.
@@ -68,6 +68,7 @@ In the following sections, we derive and discuss the components of this model, v
 To start, we build a hierarchical probabilistic model to estimate the per-transit RV measurement uncertainty of the \Gaia\ survey as a function of apparent magnitude and observed color.
 
 \section{The basics}
+\label{sect:basics}
 
 For each RV target, the \Gaia\ EDR3 catalog reports the median RV, an estimate of the error on this median, and the number of individual RV measurements (called ``transits'') that were used in this estimate.
 In our analysis, we ignore the median RV and instead only consider the RV error and number of transits.
@@ -78,12 +79,12 @@ The RV error $\epsilon_n$ for a target $n$ is computed as \citep{Katz19}
 where
 \begin{eqnarray}
 	\label{eq:sample-var}
-	{s_n}^2 = \frac{1}{T_n-1}\sum_{t=1}^{T_n} \left(v_{n,t} - \bar{v}_n\right)^2
+	{s_n}^2 = \frac{1}{T_n-1}\sum_{i=1}^{T_n} \left(v_{n,i} - \bar{v}_n\right)^2
 \end{eqnarray}
 is the sample variance of the individual RV measurements $v_{n,t}$.
 In \autoref{eq:sample-var}, $t=1,\cdots,T_n$ indexes the $T_n$ transits for target $n$ and
 \begin{eqnarray}
-	\bar{v}_n = \frac{1}{T_n}\sum_{t=1}^{T_n} v_{n,t}
+	\bar{v}_n = \frac{1}{T_n}\sum_{i=1}^{T_n} v_{n,i}
 \end{eqnarray}
 is the mean RV.
 In all that follows, it is much simpler to reason about the sample variance ${s_n}^2$ instead of the error on the median ${\epsilon}_n$, but that isn't a problem because we can compute
@@ -94,143 +95,138 @@ for any target, using only values available in the catalog: $\epsilon_n$ and $T_
 
 Now, for a given target $n$, in the absence of any excess radial velocity signal, and if we know it's per-transit radial velocity measurement uncertainty $\sigma_n$, we would expect the quantity
 \begin{eqnarray}
-	\frac{(T_n - 1)\,s_n^2}{{\sigma_n}^2}
+	{\xi_n}^2 &=& \frac{(T_n - 1)\,s_n^2}{{\sigma_n}^2}
+	\label{eq:chi-sq-samp}
 \end{eqnarray}
 to be chi-squared distributed with $T_n - 1$ degrees of freedom.
+Based on this argument, we can identify targets that are outliers with respect to this expectation.
+\autoref{fig:infer_sigma:data} illustrates this idea using a simulated catalog of \Gaia\ RV targets.
+Here, we generate a sample of \Gaia\ RV measurements for binary star systems with orbital parameters drawn from a simple population model, and compare the distribution of measured ${s_n}^2$ values to those that we would measure in the absence of binary companions.
+In \autoref{fig:infer_sigma:data}, both distributions peak near the (known) measurement uncertainty $\sigma^2$---a fact that we will use in the following section to \emph{infer} $\sigma^2$---but the distribution of binary systems shows a tail to larger values of $s^2$.
 
-With this out of the way, the basic intuition underlying the methods discussed below is that, for a given target $n$, if we know the number of RV transits $T_n$ and the per-transit RV uncertainty $\sigma_n$, we can estimate the sampling distribution for ${s_n}^2$.
+We can even go one step further, and derive the expected sampling distribution for ${s_n}^2$ under some model for the excess RV signal.
+For example, in our case, we want to infer the orbital properties of any binary systems based on the observed ${s_n}^2$.
+In this case, our model for the expected RV time series is (CITE L\&F)
+\begin{eqnarray}
+	\mu_n(t;\,\theta_n) &=& v_{0,n} + K_n\,\left[\cos(f_n(t) + \omega_n) + e_n\,\cos \omega_n\right] \quad,
+	\label{eq:rv-model}
+\end{eqnarray}
+but the following derivation can be used more generally.
+We can evaluate \autoref{eq:rv-model}, at observation times $\{t_{n,i}\}_{i=1}^{T_n}$ and orbital parameters $\theta_n=\{K_n,\,e_n,\,\omega_n,\,\ldots\}$.
+Of course, in our case, we don't actually \emph{know} the observation times, so we will need to marginalize those out below, but for now, let's proceed as if we do know them.
+For a given set of parameters, it can be shown (see \autoref{app:ncx2}) that the sampling distribution for our scalar
+\begin{eqnarray}
+	{\xi_n}^2 &=& \frac{(T_n - 1)\,s_n^2}{{\sigma_n}^2}
+	\label{eq:chi-sq-samp2}
+\end{eqnarray}
+is a non-central $\chi^2$ distribution with $T_n$ degrees of freedom, and non-centrality parameter
+\begin{eqnarray}
+	\lambda &=& \sum_{i=1}^{T_n} \left[\frac{\mu_n(t_i;\,\theta_n) - \bar{\mu}_n}{\sigma_n}\right]^2
+	\label{eq:ncx2-nc-param}
+\end{eqnarray}
+where
+\begin{eqnarray}
+	\bar{\mu}_n &=& \frac{1}{T_n}\sum_{i=1}^{T_n} \mu_n(t_i;\,\theta_n)
+\end{eqnarray}
+is the sample mean of the model evaluated at the observation times.
+This sampling distribution defines a likelihood function for the parameters $\theta_n$, that we will form the foundation for the probabilistic models built in the following sections.
+
+In all the above, we assumed that the per-observation RV measurement uncertainty $\sigma_n$ was known.
+This is not, however, a number that we have access to.
+Instead, in the next section we derive a hierarchical model for determining a calibrated data-driven estimate of $\sigma_n$, as a function of color and apparent magnitude, based on the published EDR3 catalog.
 
 \begin{figure}
 	\begin{centering}
-		\includegraphics{figures/infer_sigma_data.pdf}
-		\caption{A figure.}
+		\includegraphics[width=0.8\textwidth]{figures/infer_sigma_data.pdf}
+		\caption{The distribution of RV sample variance ${s}^2$ for a simulated population of binary stars observed by \Gaia\ (unfilled histogram), compared to the distribution that would have been observed in the absence of companions (shaded histogram).
+			The peak of each distribution is determined by the per-measurement RV uncertainty $\sigma^2$, but the catalog of binaries exhibits a heavy tail to large values of $s^2$, which we will use to detect these systems in the real \Gaia\ EDR3 catalog.}
 		\label{fig:infer_sigma:data}
 	\end{centering}
 \end{figure}
 
+\section{Estimating Gaia's per-transit RV measurement uncertainty}\label{sec:noise}
+
+A key element of our analysis is that we must be able to make, for each target $n$ in our sample, a reasonably accurate estimate of the per-transit RV measurement uncertainty, called $\sigma_n$ in the previous section.
+The \Gaia\ catalog does not include this value, but as we will demonstrate, it is possible to make an estimate of $\sigma_n$ for each target $n$, using the data available in the catalog.
+In practice, we will build a data-driven model to infer $\sigma$ in small bins in observed $G_\mathrm{BP} - G_\mathrm{RP}$ color and apparent $G$-band magnitude $m_\mathrm{G}$, making the simplifying assumption that $\sigma$ is approximately constant at a given color and magnitude.
+There are other factors, such as distance and stellar evolutionary state, that will affect the measurement uncertainty for a given target, but we find that including these axes has a negligible effect on the inferred $\sigma$, and the added complexity is not required for the level of precision required here.
+
+To set up this model, we create a fine grid in color and magnitude, and then for each cell of this grid, we infer $\sigma_n$ independently of the other bins.
+In each bin, we assume that all the targets are unresolved binaries with unknown RV semi-amplitude, and we fit for the orbital parameters of each target and the shared RV measurement uncertainty, simultaneously.
+In principle, we could use the likelihood function defined in the previous section---and our assumption that the value of $\sigma_n$ is constant within a small enough color--magnitude bin---to simultaneously infer $\sigma_n$, $\theta_n$ for a sample of \Gaia\ targets.
+This proposal is made somewhat more complicated by the fact that we also don't know the observation times $t_{n,i}$ and need to marginalize over them.
+We discuss this in more detail in SOMESECTION, but here we will make the further simplifying assumptions to define a tractable effective model.
+We restrict ourselves (for now) to circular orbits and assume that the orbit of each binary is well-sampled.
+This means that we can approximate the non-centrality parameter as
+\begin{eqnarray}
+	\lambda_{\mathrm{eff},n} &=& \frac{T_n\,{K_n}^2}{2\,\pi\,{\sigma_n}^2}\int_{0}^{2\,\pi} \cos^2\phi \dd\phi = \frac{T_n\,{K_n}^2}{2\,{\sigma_n}^2} \quad,
+	\label{eq:lambda-eff}
+\end{eqnarray}
+where $K_n$ is the unknown RV semi-amplitude of the orbit of target $n$.\footnote{Some intution for the factor of $T_n$ in \autoref{eq:lambda-eff} can be developed by recognizing that $\lambda$ is defined in \ref{eq:ncx2-nc-param} as $T_n$ times the sample variance of the model, evaluated at the observed times.}
+
+Given this definition for $\lambda_{n,\mathrm{eff}}$, we can define the probabilistic model
+\begin{eqnarray}
+	p(\sigma_n,\,\{K_n\}\,|\,\{T_n,\,{s_n}^2\}) \propto
+	p(\sigma_n)\,\prod_{n=1}^{N} p(K_n)\,p(T_n,\,{s_n}^2\,|\,\sigma_n,\,K_n)
+\end{eqnarray}
+where the sampling distribution $p(T_n,\,{s_n}^2\,|\,\sigma_n,\,K_n)$ is a non-central $\chi^2$ distribution with $T_n - 1$ degrees of freedom and non-centrality parameter $\lambda_{\mathrm{eff},n}$ defined by \autoref{eq:lambda-eff}.\footnote{We note that since the sampling distribution is defined for $\xi_n^2$, which is a function of $\sigma_n$, we must (and do!) include the Jacobian in our definition of $p(T_n,\,{s_n}^2\,|\,\sigma_n,\,K_n)$, with respect to the usual definition of the non-central $\chi^2$ probability density.}
+For $p(\sigma_n)$ and $p(K_n)$, we assume the following broad, weakly-informative priors
+\begin{eqnarray}
+	\ln \sigma_n &\sim& \mathcal{N}(0, 10) \nonumber\\
+	\ln K_n &\sim& \mathcal{N}(0, 10) \quad.
+\end{eqnarray}
+Given these definitions, we implement this model using the \package{numpyro} probabilistic programming language and estimate the joint posterior using variational inference.
+SOME MORE WORDS ABOUT VI.
+
+We validate this procedure by generating a simulated \Gaia\ catalog for a sample of unresolved binaries (a large fraction of which have undetectable amplitude) with known orbital parameters and RV measurement uncertainty.
+This catalog is shown in \autoref{fig:infer_sigma:data}, and \autoref{fig:infer_sigma:results} demonstrates that this procedure provides an estimate of the true RV uncertainty and, to some extent, the injected RV semi-amplitude for each target.
+This is not a trivial experiment, because the procedure used to simulate the catalog was not consistent with the simplifying modeling assumptions.
+In particular, the simulated values for $\sigma_n$ were generated from a log-normal distribution $\ln\sigma_n \sim \mathcal{N}(\ln\sigma_0,\,0.1)$.
+Furthermore, the simulated RV error values ${s_n}^2$ were generated by procedurally sampling observation times and orbital phases, injecting noise, and computing the sample variance.
+In most cases, the orbits are far from well-sampled.
+This helps to demonstrate that the accuracy of our inference procedure is not significantly affected by our simplifying assumptions.
+
 \begin{figure}
 	\begin{centering}
-		\includegraphics{figures/infer_sigma.pdf}
-		\caption{A figure.}
+		\includegraphics[width=0.8\textwidth]{figures/infer_sigma.pdf}
+		\caption{For the simulated \Gaia\ catalog from \autoref{fig:infer_sigma:data}, this figure shows the recovered RV semi-amplitude for each simulated target, as a function of its true semi-amplitude.
+			The dashed horizontal line shows the mean RV measurement uncertainty used to simulate the data, compared to the inferred value shown in blue.}
 		\label{fig:infer_sigma:results}
 	\end{centering}
 \end{figure}
 
-\section{Estimating the per-transit radial velocity precision}\label{sec:noise}
+In practice, the values for $\sigma_n$ inferred using the above procedure are somewhat noisy.
+To regularize our estimates in each bin with more than 1000 targets, we repeat the inference for 5 different, randomly-selected, 1000-target samples, and average the resulting estimates of $\sigma_n$.
+We also perform some light smoothing in color and magnitude to remove some remaining sample noise in bins with few targets.
+Our final estimate of the per-transit RV uncertainty $\sigma_n$ as a function of color and magnitude is shown in the color map in \autoref{fig:noise_model}.
+The shaded sections of that figure indicate regions where there were fewer than 50 targets per bin.
+For targets outside the well sampled regime, our estimate of $\sigma_n$ is extrapolated, and should be considered suspect.
+\autoref{fig:noise_model} shows that the \Gaia\ RV spectrograph can reach a precision of better than $300\,\mathrm{m\,s^{-1}}$ for the brightest targets, with more typical values being of order $1\,\mathrm{km\,s^{-1}}$.
 
 \begin{figure}
 	\begin{centering}
-		\includegraphics{figures/noise_model.pdf}
-		\caption{A figure.}
+		\includegraphics[width=0.8\textwidth]{figures/noise_model.pdf}
+		\caption{The estimated per-transit \Gaia\ RV measurement uncertainty as a function of color and magnitude.
+			The shaded region indicates areas where there were fewer than 50 targets per bin, so this estimate is extrapolated to these regions.}
 		\label{fig:noise_model}
 	\end{centering}
 \end{figure}
 
+\autoref{fig:sigma_cmd} shows the mean RV measurement uncertainty across the color--magnitude diagram, where we have estimated the distance of each source using the inverse parallax.
+In this figure, there is some shot noise visible around the edges where the target density drops, but there is not otherwise a huge amount of structure.
+DO WE WANT TO SAY ANYTHING ELSE?
+
 \begin{figure}
 	\begin{centering}
-		\includegraphics{figures/sigma_cmd.pdf}
-		\caption{A figure.}
+		\includegraphics[width=0.8\textwidth]{figures/sigma_cmd.pdf}
+		\caption{The average per-transit RV uncertainty across the color--magnitude diagram.
+			The contours indicate the density of targets in this same space to guide the eye.
+			Most of the structure in this diagram can be seen near the edges where the number of samples is small.
+			WHAT ABOUT THOSE BLUE BOIS?}
 		\label{fig:sigma_cmd}
 	\end{centering}
 \end{figure}
 
-\begin{figure}
-	\begin{centering}
-		\includegraphics{figures/binary_fraction_cmd.pdf}
-		\caption{A figure.}
-		\label{fig:binary_fraction_cmd}
-	\end{centering}
-\end{figure}
-
-\begin{figure}
-	\begin{centering}
-		\includegraphics{figures/completeness.pdf}
-		\caption{A figure.}
-		\label{fig:completeness}
-	\end{centering}
-\end{figure}
-
-
-A key element of our analysis is that we must make a reasonably accurate estimate of the per-transit radial velocity measurement uncertainty.
-The \Gaia\ pipeline does not release a public estimate of this, but it can be estimated from the data in the public catalog.
-To make this estimate, the key assumption that we make is that the RV uncertainty depends only on a target's (reddened) $G_\mathrm{BP} - G_\mathrm{RP}$ color and apparent $G$-band magnitude $m_\mathrm{G}$.
-While this is certainly not the full story, we discuss several validation experiments below and argue that this is not an overly restrictive assumption given the precision of our measurements.
-
-\subsection{The fundamental model}
-
-To build intuition, let's start with a simplified toy model that we will extend below.
-If we have a catalog of $N$ targets where only the sample variance ${s_n}^2$ of the RV time series and the number of observations $T_n$ of target $n$.
-For our initial toy model, let's also assume that we know that the only source of noise is the per-transit measurement uncertainty, which we will assume to be Gaussian.
-In this case, the generative model is
-\begin{eqnarray}
-	v_{n,t} &\sim& \mathcal{N}(\mu_n,\,\sigma^2)
-\end{eqnarray}
-and then $s_n$ is computed as defined above in \autoref{eq:sample-var}.
-In this model, our data are the empirical sample variances ${s_n}^2$ and we want to infer the underlying variance $\sigma^2$ that is shared by all targets $n$.
-In other words, we must evaluate the likelihood function
-\begin{eqnarray}
-	\label{eq:noise-like1}
-	\mathcal{L}(\sigma^2;\,\left\{{s_n}^2\right\}) &=& p(\left\{{s_n}^2\right\}\,|\,\sigma^2) \\
-	&=& \prod_{n=1}^N\int p({s_n}^2\,|\,v_{n,t})\,p(v_{n,t}\,|\,\sigma^2) \dd v_{n,t}\quad.
-\end{eqnarray}
-From this equation we can see that the statistic $X_n$ (WAIT, CAN WE? MORE HERE)
-\begin{eqnarray}
-	X_n &=& \frac{(T_n - 1)\,{s_n}^2}{\sigma^2}
-\end{eqnarray}
-is chi-squared distributed with $T_n - 1$ degrees of freedom.
-Therefore, \autoref{eq:noise-like1} becomes
-\begin{eqnarray}
-	\label{eq:noise-like2}
-	\mathcal{L}(\sigma^2;\,\left\{{s_n}^2\right\}) &=& \prod_{n=1}^N \left|\frac{\partial X_n}{\partial {s_n}^2}\right|\,p(X_n\,|\,\sigma^2) \nonumber\\
-	&=& \prod_{n=1}^N \frac{T_n - 1}{\sigma^2}\,p(X_n\,|\,\sigma^2)
-\end{eqnarray}
-where $p(X_n\,|\,\sigma)$ is a chi-squared density with $T_n - 1$ degrees of freedom.
-In this equation, the Jacobian term is important since $\sigma^2$ is a parameter of the model.
-
-\subsection{Accounting for per-target variability}
-
-In the previous discussion we assumed that the \emph{only} source of noise contributing to the RV sample variance measurement was the individual RV measurement uncertainties.
-This isn't going to be true when working with real data since there will by other sources of excess noise, both systematic and astrophysical; in fact, that's the whole point of this paper!
-To handle this, we add $N$ new parameters ${\delta_n}^2$ to our model, which we will add to the baseline uncertainty $\sigma^2$ when computing the expected variance for a target $n$.
-With this change, our model is nearly identical to \autoref{eq:noise-like2}, with $\sigma^2$ replaced with $\sigma^2 + {\delta_n}^2$
-\begin{eqnarray}
-	\label{eq:noise-like3}
-	\mathcal{L}(\sigma^2,\,\left\{{\delta_n}^2\right\};\,\left\{{s_n}^2\right\}) &=& \prod_{n=1}^N \frac{T_n - 1}{\sigma^2 + {\delta_n}^2}\,p(X_n\,|\,\sigma^2 + {\delta_n}^2) \quad.
-\end{eqnarray}
-This is a very flexible model with more parameters than data points, but it is still possible to perform parameter estimation.
-
-\subsection{Scaling inference}
-
-In the previous subsection, we defined a probabilistic model for simultaneously inferring the (shared) measurement uncertainty $\sigma$ and the (per-target) intrinsic variability $\delta_n$ for an ensemble of \Gaia\ RV targets.
-At this point, the main parameter that we're interested in inferring is $\sigma$ and to make sensible measurements of this value, we need to place priors on $\delta_n$ and marginalize.
-To do this, we use a mean-field variational inference (VI) model implemented in \package{numpyro} and \package{jax}.
-In this model, the parameters are $\log \sigma$ and $\log \delta_n$ with broad zero-mean Gaussian priors and the likelihood is given be \autoref{eq:noise-like3}.
-We model the full posterior density as a multivariate Gaussian in these logarithmic parameters and then optimize the Kullback--Leibler divergence between this approximate posterior and the actual posterior as described by CITE AUTODIFF VI PAPER.
-
-We then apply this VI procedure in bins of color and magnitude (ADD SPECS OF GRID).
-In each bin, we perform 5 iterations of the following procedure and average the estimated values of $\sigma$ across iterations.
-For each iteration, we select up to 1000 random targets within the bin\footnote{If the bin has fewer than 1000 targets, we use all of the targets.}, run 5000 steps of VI to infer the mean of the marginalized posterior for $\log \sigma$ and return that value.
-To minimize the effects of shot noise, we then lightly smooth this grid of estimated $\log \sigma$ across color and magnitude.
-\autoref{fig:noise_model} shows this estimate of the per-transit RV uncertainty $\sigma$ as a function of observed color and magnitude.
-In this figure, the shaded regions indicate parts of parameter space where there were fewer than 50 targets so our procedure could not be applied reliably.
-
-% \begin{figure}
-% 	\plotone{figures/noise_model.pdf}
-% 	\caption{A model of \Gaia's per-transit RV uncertainty as a function of its observed color and magnitude.
-% 		This model is constructed using a data-driven hierarchical model to deconvolve the measurement uncertainty and intrinsic RV variability, by assuming that ensembles of targets with similar colors and magnitudes will have the same per-transit RV measurement uncertainty.
-% 		The shaded regions at the edges of this figure have a sufficiently small number of targets that this ensemble model cannot be reliably used and any estimated RV uncertainties in these regions will be extrapolated. \label{fig:noise_model}}
-% \end{figure}
-
-Using this grid of estimated uncertainties, we interpolate the model to the color and magnitude coordinates of each \Gaia\ RV source to provide an estimate of the baseline RV measurement uncertainty for each target.
-\autoref{fig:sigma_cmd} shows the average per-transit RV uncertainty across the color--magnitude diagram, where we have estimated the distance of each source using the inverse parallax.
-In this figure, there is some shot noise visible around the edges where the target density drops, but there is not otherwise a huge amount of structure.
-
-% \begin{figure}
-% 	\plotone{figures/sigma_cmd.pdf}
-% 	\caption{The typical per-transit RV uncertainty across the \Gaia\ color--magnitude diagram.
-% 		The color bar indicates the binned average per-transit RV uncertainty, and the contours indicate the density of \Gaia\ targets across the same space.
-% 		Any bins with fewer than 50 targets are masked and colored white in this figure. \label{fig:sigma_cmd}}
-% \end{figure}
 
 \section{Binary probabilities}
 
@@ -238,47 +234,45 @@ One side effect of inferring the per-transit radial velocity uncertainty for all
 This is some sort of ``outlier'' probability, but we can use it as a proxy for binarity in the absence of systematic, or other un-accounted for effects.
 We explore the limitations of such an assumption in the following sections, but it is useful for now to discuss the math for the idealized case here.
 
-If each measured RV sample for a given \Gaia\ target $n$ was truly just generated as Gaussian noise with variance ${\sigma_n}^2$, the sampling distribution for the measured, normalized RV variance $X_n = (T_n - 1)\,{s_n}^2 / {\sigma_n}^2$ would be a $\chi^2$ with $T_n - 1$ degrees of freedom.
+As discussed in \autoref{sect:basics}, if the RV measurements for a given \Gaia\ target $n$ includes only Gaussian noise with variance ${\sigma_n}^2$, the sampling distribution for the measured, normalized RV variance ${\xi_n}^2 = (T_n - 1)\,{s_n}^2 / {\sigma_n}^2$ is $\chi^2$ with $T_n - 1$ degrees of freedom.
 Therefore, we can compute the $p$-value for this null hypothesis as
 \begin{eqnarray}
-	\mathrm{Pr}(X > X_n\,|\,\mathrm{null}) &=& \int_{X_n}^\infty \chi^2 (X;\,T_n-1) \dd X \quad.
+	\mathrm{Pr}(\xi^2 > {\xi_n}^2\,|\,\mathrm{null}) &=& \int_{\xi_n^2}^\infty \chi^2 (\xi^2;\,T_n-1) \dd \xi^2 \quad.
 \end{eqnarray}
-This is a useful number since, it can be used to construct a catalog with a specific expected false positive rate.
+A detailed discussion of the interpretation of $p$-values is beyond the scope of this paper, but it's useful to recognize that this value quantifies the frequency with which we would expect to mislabel a single star as a binary, given all the assumptions of our model.
+% This is a useful number since, it can be used to construct a catalog with a specific expected false positive rate.
 
-Specifically, we construct a binary catalog by selecting all targets with a $p$-value below some threshold $P_0$.
+We construct a fiducial binary catalog by selecting all targets with a $p$-value below some threshold $P_0$.
 If our Gaussian model is correct and our estimates of the per-transit measurement uncertainty is accurate, then we would expect targets without companions to pass threshold with probability $P_0$.
 In other words, setting $P_0 = 0.001$, we would expect 1 in 1,000 single targets to pass our cut and be incorrectly labelled as a binary.
 This number does not directly map to the false positive rate, since that will also depend on the true binary fraction, however, it gives us a tuning parameter that can trade off precision and recall in our selection.
 
 \autoref{fig:p_value_dist} shows the observed distribution of $p$-values across the full catalog.
-Our null hypothesis here is that every target is a single star with only Gaussian noise with known variance as estimated in \autoref{sec:noise} and, if this hypothesis was correct, we would expect the $p$-values to be uniformly distributed between zero and one (as indicated by the orange dashed histogram in the left panel of \autoref{fig:p_value_dist}).
-The observed distribution is significantly different from this expectation and there are a few factors causing this.
-MORE HERE.
-
-% \begin{figure}
-% 	\plotone{figures/p_value_dist.pdf}
-% 	\caption{The distribution of $p$-values for the full \Gaia\ EDR3 catalog.
-% 		\emph{(left)} The black histogram shows the observed distribution of $p$-values for the sample, and the orange histogram shows the distribution that would be expected for our null hypothesis: that all targets are single stars and the observed RV errors are the result of \emph{only} the per-transit RV uncertainties.
-% 		The overdensity at large $p$ suggests that some fraction of the per-transit RV uncertainties are overestimated, and we interpret the large peak at $p \approx 0$ as an indication of multiplicity.
-% 		\emph{(right)} The same distribution plotted near $p \approx 0$.
-% 		We select $p \leq 0.001$ as our threshold for rejecting the null hypothesis in all the following figures.
-% 		Therefore, the shaded region indicates the targets that would be classified as multiple systems.
-% 		\label{fig:p_value_dist}}
-% \end{figure}
+Our null hypothesis here is that every target is a single star with only Gaussian noise with known variance as estimated in \autoref{sec:noise} and, if this hypothesis were correct, we would expect the $p$-values to be uniformly distributed between zero and one (as indicated by the orange dashed histogram in \autoref{fig:p_value_dist}).
+The fact that the observed distribution is significantly different from this expectation shows that there are a significant number of outliers.
 
 After computing the $p$-value for every target in our catalog, we can use these values to identify targets that are likely multi-star systems or other kinds of outliers.
-\autoref{fig:binary_fraction_cmd} shows the fraction of targets with $p < 0.001$ as a function fo their location in the color--magnitude diagram.
-In the absence of other sources of noise\footnote{We discuss these other noise sources in SOME SECTION.}, this can be interpreted to first order as the binary fraction.
+\autoref{fig:binary_fraction_cmd} shows the fraction of targets with $p < 0.001$ as a function of their location in the color--magnitude diagram.
+In the absence of other sources of noise\footnote{We discuss these other noise sources in SOME SECTION.}, this can be interpreted to first order as the binary fraction, but it is important to remember that this is conditioned on the sensitivity of our detection procedure, an effect that we discuss below.
 With this interpretation, this figure shows some expected structures such as an equal-mass main sequence and an increased binary fraction at higher mass.
 
-% \begin{figure}
-% 	\plotone{figures/binary_fraction_cmd.pdf}
-% 	\caption{Like \autoref{fig:noise_model}, but this time the color bar shows the fraction of targets where our null hypothesis is rejected.
-% 		This is an estimate of the fraction of \Gaia\ targets that are detectable multiple star systems as a function of color and magnitude.
-% 		In other words, this can (with the appropriate caveats) be interpreted as the binary fraction across the color--magnitude diagram.
-% 		Under this interpretation, the equal-mass binary main sequence is clearly visible, and there is an increased binary fraction DESCRIBE THIS.
-% 		\label{fig:binary_fraction_cmd}}
-% \end{figure}
+\begin{figure}
+	\begin{centering}
+		\includegraphics[width=0.8\textwidth]{figures/p_value_dist.pdf}
+		\caption{The distribution of $p$-values across the full sample. In the absence of outliers, we would expect to find the distribution shown as a dashed orange line.}
+		\label{fig:p_value_dist}
+	\end{centering}
+\end{figure}
+
+\begin{figure}
+	\begin{centering}
+		\includegraphics[width=0.8\textwidth]{figures/binary_fraction_cmd.pdf}
+		\caption{Like \autoref{fig:sigma_cmd}, but this time the color bar shows the fraction of targets with a $p$-value less than 0.001. This is an estimate of the fraction of \Gaia\ targets that are detectable multiple star systems as a function of color and magnitude. In other words, this can (with the appropriate caveats) be interpreted as the binary fraction across the color--magnitude diagram. Under this interpretation, the equal-mass binary main sequence is clearly visible, and there is an increased binary fraction DESCRIBE THIS.}
+		\label{fig:binary_fraction_cmd}
+	\end{centering}
+\end{figure}
+
+
 
 \section{Completeness \& reliability}
 
@@ -324,6 +318,16 @@ These measurements don't fully capture all the limitations of this inference, bu
 % 		% It's worth noting that since this figure is integrated over a simulated distribution of transit numbers, the detailed shape depends on the actual distribution.
 % 		\label{fig:completeness}}
 % \end{figure}
+
+\begin{figure}
+	\begin{centering}
+		\includegraphics[width=\textwidth]{figures/completeness.pdf}
+		\caption{A figure.}
+		\label{fig:completeness}
+	\end{centering}
+\end{figure}
+
+
 
 \section{A model for the radial velocity error}
 
@@ -428,7 +432,8 @@ See \autoref{fig:noise_model}.
 
 \appendix
 
-\section{Probably some fancy math}
+\section{The non-central $\chi^2$ distribution}
+\label{app:ncx2}
 
 \bibliography{bib}{}
 \bibliographystyle{aasjournal}

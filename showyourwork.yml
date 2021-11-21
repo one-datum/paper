@@ -8,6 +8,8 @@ dependencies:
     - src/archive/inference/inferred.fits.gz
   src/figures/binary_fraction_cmd.py:
     - src/archive/inference/inferred.fits.gz
+  src/figures/p_value_dist.py:
+    - src/archive/inference/inferred.fits.gz
   src/figures/completeness.py:
     - src/archive/simulations/inferred.fits.gz
 
