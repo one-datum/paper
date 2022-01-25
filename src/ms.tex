@@ -73,7 +73,7 @@ To start, we build a hierarchical probabilistic model to estimate the per-transi
 For each RV target, the \Gaia\ EDR3 catalog reports the median RV, an estimate of the error on this median, and the number of individual RV measurements (called ``transits'') that were used in this estimate.
 In our analysis, we ignore the median RV and instead only consider the RV error and number of transits.
 The RV error $\epsilon_n$ for a target $n$ is computed as \citep{Katz19}
-\begin{eqnarray}
+\begin{eqnarray}\label{eq:rv-error-def}
 	{\epsilon_n}^2 = \left(\sqrt{\frac{\pi}{2\,T_n}}\,s_n\right)^2 + 0.11^2
 \end{eqnarray}
 where
@@ -113,7 +113,7 @@ In this case, our model for the expected RV time series is (CITE L\&F)
 \end{eqnarray}
 but the following derivation can be used more generally.
 We can evaluate \autoref{eq:rv-model}, at observation times $\{t_{n,i}\}_{i=1}^{T_n}$ and orbital parameters $\theta_n=\{K_n,\,e_n,\,\omega_n,\,\ldots\}$.
-Of course, in our case, we don't actually \emph{know} the observation times, so we will need to marginalize those out below, but for now, let's proceed as if we do know them.
+Of course, in our case, we don't actually \emph{know} the observation times\footnote{Say something about why we can't really use the transit time calculations from GOST or the Python one: they don't actually produce estimates of the RV times, so we expect that these will be a subset of the astrometric times, but that doesn't help too much.}, so we will need to marginalize those out below, but for now, let's proceed as if we do know them.
 For a given set of parameters, it can be shown (see \autoref{app:ncx2}) that the sampling distribution for our scalar
 \begin{eqnarray}
 	{\xi_n}^2 &=& \frac{(T_n - 1)\,s_n^2}{{\sigma_n}^2}
@@ -273,38 +273,33 @@ With this interpretation, this figure shows some expected structures such as an 
 \end{figure}
 
 
+\newpage
 
 \section{Completeness \& reliability}
 
-We would like to characterize the efficiency with which our method detects astrophysical signals from companions.
-In other words we want to estimate the \emph{completeness} of our survey.
-To do this, we use simulated injection and recovery tests where we generate simulated data with a known signal and attempt to recover it with our pipeline.
-In particular, we will focus on characterizing the survey completeness as a function of the radial velocity measurement uncertainty and semi-amplitude, integrated over all of the other dimensions.
-There are other parameters that affect the detection thresholds including, most importantly, the number of RV transits, but these are second order effects and we will marginalize over these effects using realistic distributions.
+In the previous section, we outlined a procedure for identifying possible binary star systems, using the \Gaia\ RV errors, but this procedure is not equally sensitive across the full space binary orbital and physical properties.
+To quantify this effect, we quantify the completeness of our survey by simulating a catalog of RV error measurements for a sample of binaries with known properties.
+Using these simulations, we can estimate the likelihood that our method would detect a binary system as a function of its properties.
+In particular, the main parameters that determine the detectability of a binary are its RV semi-amplitude of the orbit, per-transit measurement uncertainty, and the number of RV transits.
 
-We use an approximate broken power-law model for the number of radial velocity transits:
-\begin{eqnarray}
-	\label{eq:nb-transits}
-	p(T_n) &\propto& \left\{\begin{array}{ll}
-		1                                  & T_n < T_\mathrm{break} \\
-		(T_n / T_\mathrm{break})^{-\alpha} & \mathrm{otherwise}
-	\end{array} \right.
-\end{eqnarray}
-where the parameters are set to approximately match the observed distribution.
-These parameters are set as follows: the breakpoint is $T_n = 12$ and the power-law index is $\alpha = 6$.
-As demonstrated by SOMEFIGURE, this approximate distribution is a reasonably good fit.
+\autoref{fig:completeness} shows our estimated survey completeness as a function of these primary parameters.
+This figure mostly shows the expected behavior: our method is more sensitive to systems with larger RV semi-amplitudes that were observed more frequently, with the smallest measurement uncertainty.
+However, our detection efficiency falls off at larger RV semi-amplitudes, since systems with RV error ($\epsilon$, as defined in \autoref{eq:rv-error-def}) larger than $20\,\mathrm{km/s}$ are removed from the \Gaia\ catalog as outliers, an effect that our simulations include.
 
-Otherwise we sample the other parameters period, RV semi-amplitude, phase, eccentricity, argument of periasteron, and per-transit measurement uncertainty from the simple distributions listed in SOMETABLE.
+We generate a catalog of 100,000 simulated binary systems using the following steps:
+\begin{enumerate}
+	\item Sample orbital parameters from the distributions listed in SOMETABLE,
+	\item Simulate the observation times by randomly sampling $T_n$ times in the range $[0, 668\,\mathrm{d})$, the approximate duration of \Gaia\ DR2, and
+	\item Calculate the RV signal for a Keplerian orbit observed at the simulated times and return its sample variance.
+\end{enumerate}
+Then for consistency with the \Gaia\ processing pipeline, we compute the floored and scaled ``error'' $\epsilon$ (\autoref{eq:rv-error-def}) used to construct the official catalog and, like the real catalog, mark any with $\epsilon > 20\,\mathrm{km/s}$ as non-detections.
+Using this catalog, we evaluate the $p$-value for each simulated target to determine if it would be detected using our method.
+We then bin these results as a function of the relevant parameters in \autoref{fig:completeness}, in order to estimate the detection efficiency of our method.
 
-Then we simulate an RV time series with $T_n$ observations sampled from \autoref{eq:nb-transits} and compute the sample variance.
-Then for consistency, we compute the floored and scaled ``error'' $\epsilon$ used to construct the \Gaia\ catalog (SOMEEQUATION) and, like the real catalog, mark any with $\epsilon > 20\,\mathrm{km/s}$ as non-detections.
-Using this catalog, we evaluate the $p$-value for each simulated target, and then estimate its RV semi-amplitude.
-Figure SOMEFIGURE shows the recovery rate as a function of RV semi-amplitude and per-transit measurement uncertainty.
-At small semi-amplitude, the injected signals are not recovered since the variance is too small to distinguish from the measurement noise.
-At large semi-amplitude, the signals are not recovered because the catalog is censored at large RV ``error'' ($\epsilon > 20\,\mathrm{km/s}$).
-Figure SOMEOTHERFIGURE shows the inferred semi-amplitude for these simulations as a function of the true value.
+\autoref{fig:completeness} doesn't fully capture all the limitations of this inference.
+For example, this result assumes that the per-transit RV uncertainty is correctly estimated, and it doesn't say anything about the false positive rate of .
 
-These measurements don't fully capture all the limitations of this inference, but we will try to address some of those below by comparing to other binary surveys.
+% , but we will try to address some of those below by comparing to other binary surveys.
 
 % \begin{figure}
 % 	\plotone{figures/completeness.pdf}
@@ -322,14 +317,18 @@ These measurements don't fully capture all the limitations of this inference, bu
 \begin{figure}
 	\begin{centering}
 		\includegraphics[width=\textwidth]{figures/completeness.pdf}
-		\caption{A figure.}
+		\caption{The fraction of simulated binary systems that we recover as a function of its RV semi-amplitude, per-transit RV measurement uncertainty, and the number of RV transits. Unsurprisingly, a larger fraction of these systems are recovered when a target is observed more frequently with smaller measurement uncertainty. Our method is not sensitive to binaries with small semi-amplitudes, since these are indistinguishable from noise, but (perhaps surprisingly) it is also not sensitive to systems with large RV semi-amplitudes since these are likely to be explicitly removed from the catalog because of the large RV error.}
 		\label{fig:completeness}
 	\end{centering}
 \end{figure}
 
 
+\newpage
 
-\section{A model for the radial velocity error}
+\section{Inferring binary orbital properties from the RV error}
+
+\noindent
+\emph{NOTE: THIS AND THE FOLLOWING SECTIONS WILL BE RE-WRITTEN.}
 
 Apparently \Gaia\ reports RV error $\epsilon$ defined as:
 \begin{eqnarray}
@@ -382,18 +381,27 @@ That was a bit ugly.
 Let's see if this works with a simulation.
 We'll simulate a single simple RV curve and then compute the distribution of $s^2$ over many different realizations of the noise.
 
-\section{Bulk radial velocity inference}
+% \section{Bulk radial velocity inference}
 
-Finally we can combine the measurement uncertainty estimates from SOME SECTION with the
+% Finally we can combine the measurement uncertainty estimates from SOME SECTION with the
 
-\section{Artisanal radial velocities}
+% \section{Artisanal radial velocities}
 
 \section{Validation}
 
+\begin{itemize}
+	\item Demo with simulated data
+	\item Comparisons to SB9 and APOGEE gold
+\end{itemize}
+
 \section{Discussion}
 
-This is a paper.
-See \autoref{fig:noise_model}.
+\begin{itemize}
+	\item Potential applications
+	\item Outlook for DR3
+	\item False positive rates
+\end{itemize}
+
 
 
 % \begin{figure}
@@ -434,6 +442,8 @@ See \autoref{fig:noise_model}.
 
 \section{The non-central $\chi^2$ distribution}
 \label{app:ncx2}
+
+Some fun maths.
 
 \bibliography{bib}{}
 \bibliographystyle{aasjournal}
