@@ -1,6 +1,5 @@
 version: 0.3.0.dev0
 verbose: true
-rule_fallback: skip
 
 dependencies:
   src/scripts/noise_model.py:
