@@ -1,18 +1,27 @@
-# User configuration; see the docs for details!
+version: 0.3.0.dev0
 verbose: true
+rule_fallback: skip
 
 dependencies:
-  src/figures/noise_model.py:
-    - src/archive/noise/process.fits
-  src/figures/sigma_cmd.py:
-    - src/archive/inference/inferred.fits.gz
-  src/figures/binary_fraction_cmd.py:
-    - src/archive/inference/inferred.fits.gz
-  src/figures/p_value_dist.py:
-    - src/archive/inference/inferred.fits.gz
-  src/figures/completeness.py:
-    - src/archive/simulations/inferred.fits.gz
+  src/scripts/noise_model.py:
+    - src/data/process.fits
+  src/scripts/sigma_cmd.py:
+    - src/data/inferred.fits.gz
+  src/scripts/binary_fraction_cmd.py:
+    - src/data/inferred.fits.gz
+  src/scripts/p_value_dist.py:
+    - src/data/inferred.fits.gz
+  src/scripts/completeness.py:
+    - src/data/simulated.fits.gz
 
-arxiv_tarball_exclude:
-  - "**/archive/**/*"
-  - "**/*.zip"
+datasets:
+  10.5281/zenodo.5593748:
+    contents:
+      archive.zip:
+        archive:
+          inference:
+            inferred.fits.gz: src/data/inferred.fits.gz
+          noise:
+            process.fits: src/data/process.fits
+          simulations:
+            inferred.fits.gz: src/data/simulated.fits.gz

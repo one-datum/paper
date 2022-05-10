@@ -4,9 +4,10 @@
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
+import paths
 from astropy.io import fits
 
-with fits.open("../archive/noise/process.fits") as f:
+with fits.open(paths.data / "process.fits") as f:
     hdr = f[0].header
     model = f[1].data
     mask = f[2].data
@@ -71,4 +72,4 @@ plt.ylim(plt.ylim()[::-1])
 plt.ylabel("$m_\mathrm{G}$")
 plt.xlabel("$G_\mathrm{BP}-G_\mathrm{RP}$")
 
-plt.savefig("noise_model.pdf", bbox_inches="tight")
+plt.savefig(paths.figures / "noise_model.pdf", bbox_inches="tight")
