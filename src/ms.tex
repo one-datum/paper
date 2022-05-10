@@ -52,7 +52,7 @@
 
 \section{Introduction} \label{sec:intro}
 
-% ARC: I could find Perryman et al. (2014) suggesting >20,000 hot jupiters from astrometry, but I couldn't find any estimate based on astrometry + radial velocity. 
+% ARC: I could find Perryman et al. (2014) suggesting >20,000 hot jupiters from astrometry, but I couldn't find any estimate based on astrometry + radial velocity.
 % 	     And I couldn't find any estimate for the number of multiple star systems, either! I think it's very much order of magnitude estimates when you get to that scale, and nobody bothers to write it down.
 By the end of the \Gaia\ Mission, it will discover SOME LARGE NUMBER of exoplanet and multiple star systems based on time resolved astrometry and radial velocities of many targets.
 In the meantime, we only have static measurements of the radial velocity, but it turns out that there is still information in the existing public facing catalog to place constraints on the orbital parameters of multiple systems using the \Gaia\ data.
@@ -227,8 +227,8 @@ ARC: What about the brightest stars (say apparent magnitude less than 6). There 
 			The contours indicate the density of targets in this same space to guide the eye.
 			Most of the structure in this diagram can be seen near the edges where the number of samples is small.
 			WHAT ABOUT THOSE BLUE BOIS?}
-			% ARC: I think not worth mentioning those blue bois yet, because at all apparent magnitudes the RV uncertainty in the blue is naturally a little larger.
-			% 	     The blue bois become more interesting when we show that the multiplicity increases here, regardless of the increased per transit RV uncertainty.
+		% ARC: I think not worth mentioning those blue bois yet, because at all apparent magnitudes the RV uncertainty in the blue is naturally a little larger.
+		% 	     The blue bois become more interesting when we show that the multiplicity increases here, regardless of the increased per transit RV uncertainty.
 		\label{fig:sigma_cmd}
 	\end{centering}
 \end{figure}
@@ -279,12 +279,76 @@ With this interpretation, this figure shows some expected structures such as an 
 \end{figure}
 
 
-\newpage
+\section{Inferring orbital properties}
+
+As discussed in \autoref{sect:basics}, we can use these same data to constrain the orbital properties of detected binary systems, under the assumption that there are no significant other dynamical bodies in the system and that the orbit is bound.
+While we (in principle) constrain all the orbital properties of the system, we find that these data can really only be used to infer the RV semi-amplitude of the orbit.
+But, as discussed below, for known binary systems, these inferences are reliable and well-calibrated.
+
+In \autoref{sect:basics}, we derived the non-central $\chi^2$ likelihood function that we combine with the priors discussed below to define the posterior probability density for the orbital parameters conditioned on the measured \Gaia\ RV error and the number of RV transits.
+SOMEFIGURE shows the posterior constraint on the orbital properties of a simulated \Gaia\ RV target, compared to the prior density for the same parameters.
+
+
+
+% \noindent
+% \emph{NOTE: THIS AND THE FOLLOWING SECTIONS WILL BE RE-WRITTEN.}
+
+% Apparently \Gaia\ reports RV error $\epsilon$ defined as:
+% \begin{eqnarray}
+% 	\epsilon^2 = \left(\sqrt{\frac{\pi}{2\,N}}\,s\right)^2 + 0.11^2
+% \end{eqnarray}
+% where
+% \begin{eqnarray}
+% 	s^2 = \frac{1}{N-1}\sum_{n=1}^N \left(v_n - \bar{v}\right)^2
+% \end{eqnarray}
+% is what we actually want.
+
+% We need to compute a probability density for the $s^2$ parameter above conditioned on a set of $N$ noisy observations of an RV orbit (with some given parameters).
+% I'm going to model the noise as Gaussian with a known, constant variance $\sigma^2$, but it's \emph{possible} (although probably tricky) that we could relax some of that.
+
+% Next, the key realization is that if we have a set of $N$ Gaussian random variables $X_n \sim \mathcal{N}\left(\mu_n,\,\sigma^2\right)$ (with known, but different, means $\mu_n$, in our case given by the RV orbit evaluated at $t_n$), then the random variable $Y = \sum X_n^2$ will be distributed as a noncentral chi-squared.
+% To use this to our advantage, we first argue that the argument in the variance sum $v_n - \bar{v}$ will be a Gaussian random variable
+% \begin{eqnarray}
+% 	v_n - \bar{v} \sim \mathcal{N}\left(\mu_n - \bar{\mu},\,\sigma^2\right)
+% \end{eqnarray}
+% where $\mu_n$ is the RV orbit \emph{model} at time $t_n$.
+% This isn't totally obvious since the $v_n$ and $\bar{v}$ distributions aren't necessarily independent, but I think it's ok because [insert relevant math here] (this derivation will look similar to the sampling distirbution for the sample variance calculations so I should double check there, but this definitely works in practice).
+
+% Then we're where we need to be: $(N - 1)\,s^2$, our quantity of interest, is now the sum of squares of $N$ Gaussian random variables.
+% Following the Wikipedia page for the noncentral chi-squared distribution\footnote{\url{https://en.wikipedia.org/wiki/Noncentral_chi-squared_distribution}}, we need to rescale our parameters to have unit variance:
+% \begin{eqnarray}
+% 	\frac{v_n - \bar{v}}{\sigma} \sim \mathcal{N}\left(\frac{v_n - \bar{\mu}}{\sigma},\,1\right)
+% \end{eqnarray}
+% where we have used the assumption that $\sigma$ is known and constant.
+% I think that we could allow non-constant $\sigma$ but that would result in a "generalized chi-squared" distribution which has no closed form\footnote{\url{https://en.wikipedia.org/wiki/Generalized_chi-squared_distribution}}.
+
+% Then the parameters of our noncentral chi-squared will be
+
+% \begin{eqnarray}
+% 	k = N
+% \end{eqnarray}
+
+% and
+
+% \begin{eqnarray}
+% 	\lambda = \sum \frac{N\,(\mu_n - \bar{\mu})^2}{(1 + N)\,\sigma^2}
+% \end{eqnarray}
+
+% And the parameter that is thus distributed is:
+
+% \begin{eqnarray}
+% 	\xi^2 = \frac{(N - 1)\,s^2}{\sigma^2}
+% \end{eqnarray}
+
+% That was a bit ugly.
+% Let's see if this works with a simulation.
+% We'll simulate a single simple RV curve and then compute the distribution of $s^2$ over many different realizations of the noise.
+
 
 \section{Completeness \& reliability}
 
 In the previous section, we outlined a procedure for identifying possible binary star systems, using the \Gaia\ RV errors, but this procedure is not equally sensitive across the full space binary orbital and physical properties.
-To quantify this effect, we quantify the completeness of our survey by simulating a catalog of RV error measurements for a sample of binaries with known properties.
+To quantify this effect, we measure the completeness of our survey by simulating a catalog of RV error measurements for a sample of binaries with known properties.
 Using these simulations, we can estimate the likelihood that our method would detect a binary system as a function of its properties.
 In particular, the main parameters that determine the detectability of a binary are its RV semi-amplitude of the orbit, per-transit measurement uncertainty, and the number of RV transits.
 
@@ -303,7 +367,7 @@ Using this catalog, we evaluate the $p$-value for each simulated target to deter
 We then bin these results as a function of the relevant parameters in \autoref{fig:completeness}, in order to estimate the detection efficiency of our method.
 
 \autoref{fig:completeness} doesn't fully capture all the limitations of this inference.
-For example, this result assumes that the per-transit RV uncertainty is correctly estimated, and it doesn't say anything about the false positive rate of .
+For example, this result assumes that the per-transit RV uncertainty is correctly estimated, and it doesn't say anything about the false positive rate in our sample.
 
 % , but we will try to address some of those below by comparing to other binary surveys.
 
@@ -328,77 +392,38 @@ For example, this result assumes that the per-transit RV uncertainty is correctl
 	\end{centering}
 \end{figure}
 
-
-\newpage
-
-\section{Inferring binary orbital properties from the RV error}
-
-\noindent
-\emph{NOTE: THIS AND THE FOLLOWING SECTIONS WILL BE RE-WRITTEN.}
-
-Apparently \Gaia\ reports RV error $\epsilon$ defined as:
-\begin{eqnarray}
-	\epsilon^2 = \left(\sqrt{\frac{\pi}{2\,N}}\,s\right)^2 + 0.11^2
-\end{eqnarray}
-where
-\begin{eqnarray}
-	s^2 = \frac{1}{N-1}\sum_{n=1}^N \left(v_n - \bar{v}\right)^2
-\end{eqnarray}
-is what we actually want.
-
-We need to compute a probability density for the $s^2$ parameter above conditioned on a set of $N$ noisy observations of an RV orbit (with some given parameters).
-I'm going to model the noise as Gaussian with a known, constant variance $\sigma^2$, but it's \emph{possible} (although probably tricky) that we could relax some of that.
-
-Next, the key realization is that if we have a set of $N$ Gaussian random variables $X_n \sim \mathcal{N}\left(\mu_n,\,\sigma^2\right)$ (with known, but different, means $\mu_n$, in our case given by the RV orbit evaluated at $t_n$), then the random variable $Y = \sum X_n^2$ will be distributed as a noncentral chi-squared.
-To use this to our advantage, we first argue that the argument in the variance sum $v_n - \bar{v}$ will be a Gaussian random variable
-\begin{eqnarray}
-	v_n - \bar{v} \sim \mathcal{N}\left(\mu_n - \bar{\mu},\,\sigma^2\right)
-\end{eqnarray}
-where $\mu_n$ is the RV orbit \emph{model} at time $t_n$.
-This isn't totally obvious since the $v_n$ and $\bar{v}$ distributions aren't necessarily independent, but I think it's ok because [insert relevant math here] (this derivation will look similar to the sampling distirbution for the sample variance calculations so I should double check there, but this definitely works in practice).
-
-Then we're where we need to be: $(N - 1)\,s^2$, our quantity of interest, is now the sum of squares of $N$ Gaussian random variables.
-Following the Wikipedia page for the noncentral chi-squared distribution\footnote{\url{https://en.wikipedia.org/wiki/Noncentral_chi-squared_distribution}}, we need to rescale our parameters to have unit variance:
-\begin{eqnarray}
-	\frac{v_n - \bar{v}}{\sigma} \sim \mathcal{N}\left(\frac{v_n - \bar{\mu}}{\sigma},\,1\right)
-\end{eqnarray}
-where we have used the assumption that $\sigma$ is known and constant.
-I think that we could allow non-constant $\sigma$ but that would result in a "generalized chi-squared" distribution which has no closed form\footnote{\url{https://en.wikipedia.org/wiki/Generalized_chi-squared_distribution}}.
-
-Then the parameters of our noncentral chi-squared will be
-
-\begin{eqnarray}
-	k = N
-\end{eqnarray}
-
-and
-
-\begin{eqnarray}
-	\lambda = \sum \frac{N\,(\mu_n - \bar{\mu})^2}{(1 + N)\,\sigma^2}
-\end{eqnarray}
-
-And the parameter that is thus distributed is:
-
-\begin{eqnarray}
-	\xi^2 = \frac{(N - 1)\,s^2}{\sigma^2}
-\end{eqnarray}
-
-That was a bit ugly.
-Let's see if this works with a simulation.
-We'll simulate a single simple RV curve and then compute the distribution of $s^2$ over many different realizations of the noise.
-
-% \section{Bulk radial velocity inference}
-
-% Finally we can combine the measurement uncertainty estimates from SOME SECTION with the
-
-% \section{Artisanal radial velocities}
-
 \section{Validation}
 
-\begin{itemize}
-	\item Demo with simulated data
-	\item Comparisons to SB9 and APOGEE gold
-\end{itemize}
+To validate our methodology, we consider the results of our analysis when applied to targets known to be binary star systems from other spectroscopic surveys.
+Specifically we compare to \emph{(a)} the \project{SB9} (CITE) catalog of spectroscopic binaries collected from the literature, and \emph{(b)} the sample of binaries detected by the \project{APOGEE} project (CITE APW).
+These catalogs have been carefully vetted, and the orbital characterization was performed using well-sampled RV time series.
+This means that these systems and their orbital properties are confidently and reliably detected.
+
+\subsection{Comparison to the \project{SB9} sample}
+
+We cross-matched the \project{SB9} catalog to \Gaia\ EDR3 sources using a HOWBIG angular separation tolerance, and SOME LIMITS on the difference between the \Gaia\ G-band magnitude and the \project{SB9}-reported V-band magnitude.
+This results in NNN targets in both \project{SB9} and \Gaia\ EDR3's RV sample.
+SOMEFIGURE shows the distribution of $p$-values for targets in this cross-match.
+WHAT DO WE SEE?
+
+The left panel of SOMEOTHERFIGURE shows our measurements of the RV semi-amplitude of each of these targets as a function of the reported \project{SB9} semi-amplitude.
+The right panel of the same figure (REF) shows the distribution of normalized residuals, demonstrating that our estimates of the semi-amplitudes are both reliable and well-calibrated.
+
+\subsection{Comparison to the APOGEE sample}
+
+As with the \project{SB9} comparison, we cross-match the \project{APOGEE} targets to the \Gaia\ EDR3 RV sample, with THE FOLLOWING DIFFERENCES.
+We find NNN targets in both catalogs.
+ONEFIGURE and ANOTHERFIGURE show the same results as FIGURESAANDBABOVE with similar conclusions.
+In particular, our measurements of RV semi-amplitude are similarly well-calibrated.
+
+\section{Data access \& catalog usage}
+
+Alongside this paper, we have released an open-access catalog of binary $p$-values and RV semi-amplitude measurements for all targets in \Gaia\ EDR3 with 3 or more RV transits.
+This catalog, its documentation, and some sample use cases are all available at SOMEURL.
+
+TODO: add some more comments about how one might go about using this catalog for future use cases with reference to Chance et al. (in prep).
+Also warn about issues with population inference or hierarchical modeling.
+
 
 \section{Discussion}
 
