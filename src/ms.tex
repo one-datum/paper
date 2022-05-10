@@ -52,6 +52,8 @@
 
 \section{Introduction} \label{sec:intro}
 
+% ARC: I could find Perryman et al. (2014) suggesting >20,000 hot jupiters from astrometry, but I couldn't find any estimate based on astrometry + radial velocity. 
+% 	     And I couldn't find any estimate for the number of multiple star systems, either! I think it's very much order of magnitude estimates when you get to that scale, and nobody bothers to write it down.
 By the end of the \Gaia\ Mission, it will discover SOME LARGE NUMBER of exoplanet and multiple star systems based on time resolved astrometry and radial velocities of many targets.
 In the meantime, we only have static measurements of the radial velocity, but it turns out that there is still information in the existing public facing catalog to place constraints on the orbital parameters of multiple systems using the \Gaia\ data.
 It has been previously demonstrated that the published radial velocity and astrometric ``errors'' can be used a proxy for multiplicity or data quality.
@@ -62,7 +64,8 @@ The fundamental idea of this paper is that even though the \Gaia\ catalog only i
 In particular, we know the number of RV observations that were used to measure the RV and its uncertainty.
 Similarly, we can estimate the expected per-transit RV uncertainty based on the distribution of targets of similar color and magnitude.
 Using these auxillary values, we can compute the expected distribution of RV error, and compare this to the measured value.
-It has been previously identified that the RV error measurements scale with RV semi-amplitude (IS THERE A CITATION; add a figure), but below we take this one step further and derive an interpretable, physical, probabilistic model for this effect that allows us to directly infer the semi-amplitude, and weak constraints on the other orbital parameters.
+It has been previously identified that the RV error measurements scale with RV semi-amplitude \citep[e.g.,][with APOGEE data]{Badenes2018} (IS THERE A CITATION; add a figure), but below we take this one step further and derive an interpretable, physical, probabilistic model for this effect that allows us to directly infer the semi-amplitude, and weak constraints on the other orbital parameters.
+% ARC: We've known this for years, but surprisingly I can't find any reference in the literature that demonstrates the scaling between RV error measurement and RV semi-amplitude.
 
 In the following sections, we derive and discuss the components of this model, validate and characterize the performance using simulated data, and compare to archival binary surveys.
 To start, we build a hierarchical probabilistic model to estimate the per-transit RV measurement uncertainty of the \Gaia\ survey as a function of apparent magnitude and observed color.
@@ -113,7 +116,7 @@ In this case, our model for the expected RV time series is (CITE L\&F)
 \end{eqnarray}
 but the following derivation can be used more generally.
 We can evaluate \autoref{eq:rv-model}, at observation times $\{t_{n,i}\}_{i=1}^{T_n}$ and orbital parameters $\theta_n=\{K_n,\,e_n,\,\omega_n,\,\ldots\}$.
-Of course, in our case, we don't actually \emph{know} the observation times\footnote{Say something about why we can't really use the transit time calculations from GOST or the Python one: they don't actually produce estimates of the RV times, so we expect that these will be a subset of the astrometric times, but that doesn't help too much.}, so we will need to marginalize those out below, but for now, let's proceed as if we do know them.
+Of course, in our case, we don't actually \emph{know} the observation times\footnote{The Gaia Observation Forecast Tool (\url{https://gaia.esac.esa.int/gost/}) predicts the transit times for astrometric measurements, and we expect the RV measurements will be a subset of these transits, but for most sources that information is not enough to substantially improve our inferences.}, so we will need to marginalize those out below, but for now, let's proceed as if we do know them.
 For a given set of parameters, it can be shown (see \autoref{app:ncx2}) that the sampling distribution for our scalar
 \begin{eqnarray}
 	{\xi_n}^2 &=& \frac{(T_n - 1)\,s_n^2}{{\sigma_n}^2}
@@ -215,6 +218,7 @@ For targets outside the well sampled regime, our estimate of $\sigma_n$ is extra
 \autoref{fig:sigma_cmd} shows the mean RV measurement uncertainty across the color--magnitude diagram, where we have estimated the distance of each source using the inverse parallax.
 In this figure, there is some shot noise visible around the edges where the target density drops, but there is not otherwise a huge amount of structure.
 DO WE WANT TO SAY ANYTHING ELSE?
+ARC: What about the brightest stars (say apparent magnitude less than 6). There are very few stars here, but some people are really interested in these for binarity / young stars / etc. Gaia has some saturating issues at these brightnesses. When combined with the low sample sizes, it makes it pointless to do anything here. Should we mention this?
 
 \begin{figure}
 	\begin{centering}
@@ -223,6 +227,8 @@ DO WE WANT TO SAY ANYTHING ELSE?
 			The contours indicate the density of targets in this same space to guide the eye.
 			Most of the structure in this diagram can be seen near the edges where the number of samples is small.
 			WHAT ABOUT THOSE BLUE BOIS?}
+			% ARC: I think not worth mentioning those blue bois yet, because at all apparent magnitudes the RV uncertainty in the blue is naturally a little larger.
+			% 	     The blue bois become more interesting when we show that the multiplicity increases here, regardless of the increased per transit RV uncertainty.
 		\label{fig:sigma_cmd}
 	\end{centering}
 \end{figure}
@@ -259,7 +265,7 @@ With this interpretation, this figure shows some expected structures such as an 
 \begin{figure}
 	\begin{centering}
 		\includegraphics[width=0.8\textwidth]{figures/p_value_dist.pdf}
-		\caption{The distribution of $p$-values across the full sample. In the absence of outliers, we would expect to find the distribution shown as a dashed orange line.}
+		\caption{The distribution of $p$-values across the full sample. In the absence of outliers, we would expect to find the distribution shown as a dashed orange line. ARC: The orange line looks to be at $p \approx$0.7, but shouldn't we expect it at 1.0?}
 		\label{fig:p_value_dist}
 	\end{centering}
 \end{figure}
@@ -267,7 +273,7 @@ With this interpretation, this figure shows some expected structures such as an 
 \begin{figure}
 	\begin{centering}
 		\includegraphics[width=0.8\textwidth]{figures/binary_fraction_cmd.pdf}
-		\caption{Like \autoref{fig:sigma_cmd}, but this time the color bar shows the fraction of targets with a $p$-value less than 0.001. This is an estimate of the fraction of \Gaia\ targets that are detectable multiple star systems as a function of color and magnitude. In other words, this can (with the appropriate caveats) be interpreted as the binary fraction across the color--magnitude diagram. Under this interpretation, the equal-mass binary main sequence is clearly visible, and there is an increased binary fraction DESCRIBE THIS.}
+		\caption{Like \autoref{fig:sigma_cmd}, but this time the color bar shows the fraction of targets with a $p$-value less than 0.001. This is an estimate of the fraction of \Gaia\ targets that are detectable multiple star systems as a function of color and magnitude. In other words, this can (with the appropriate caveats) be interpreted as the binary fraction across the color--magnitude diagram. Under this interpretation, the equal-mass binary main sequence is clearly visible, and there is an increased binary fraction above the main sequence turn-off, where blue straggler stars are typically observed.}
 		\label{fig:binary_fraction_cmd}
 	\end{centering}
 \end{figure}
