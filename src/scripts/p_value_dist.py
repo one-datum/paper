@@ -3,11 +3,12 @@
 
 import matplotlib.pyplot as plt
 import numpy as np
+import paths
 from astropy.io import fits
 
 THRESHOLD = 0.001
 
-with fits.open("../archive/inference/inferred.fits.gz") as f:
+with fits.open(paths.data / "inferred.fits.gz") as f:
     data = f[1].data
 
 conf = data["rv_unc_conf"]
@@ -46,4 +47,4 @@ ax1.set_yscale("log")
 # ax2.set_ylabel(r"number of targets [$\times 10^{5}$]")
 # ax2.set_yscale("log")
 
-fig.savefig("p_value_dist.pdf", bbox_inches="tight")
+fig.savefig(paths.figures / "p_value_dist.pdf", bbox_inches="tight")

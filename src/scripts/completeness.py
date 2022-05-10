@@ -3,11 +3,12 @@
 
 import matplotlib.pyplot as plt
 import numpy as np
+import paths
 from astropy.io import fits
 
 THRESHOLD = 0.001
 
-with fits.open("../archive/simulations/inferred.fits.gz") as f:
+with fits.open(paths.data / "simulated.fits.gz") as f:
     data = f[1].data
 
 # Compute "detection" mask
@@ -53,4 +54,4 @@ fig.subplots_adjust(right=0.85, wspace=0.1)
 cbar_ax = fig.add_axes([0.854, 0.125, 0.02, 0.75])
 fig.colorbar(c, label="completeness [%]", cax=cbar_ax)
 
-fig.savefig("completeness.pdf", bbox_inches="tight")
+fig.savefig(paths.figures / "completeness.pdf", bbox_inches="tight")

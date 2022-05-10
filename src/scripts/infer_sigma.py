@@ -15,9 +15,9 @@
 
 # Simulate some fake data:
 
-# +
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
+import paths
 
 random = np.random.default_rng(5430)
 
@@ -54,13 +54,13 @@ plt.hist(
     label="expected",
 )
 plt.axvline(
-    np.log10(true_sigma ** 2), color="C1", lw=1, label="true $\sigma^2$"
+    np.log10(true_sigma**2), color="C1", lw=1, label="true $\sigma^2$"
 )
 plt.legend(loc=2)
 plt.yscale("log")
 plt.ylabel("number of simulated targets")
 plt.xlabel("observed $\log_{10}(s^2)$")
-plt.savefig("infer_sigma_data.pdf", bbox_inches="tight")
+plt.savefig(paths.figures / "infer_sigma_data.pdf", bbox_inches="tight")
 # +
 import jax
 import jax.numpy as jnp
@@ -141,4 +141,4 @@ plt.ylim(-0.5, plt.ylim()[1])
 plt.legend()
 plt.xlabel("$\log_{10}$(simulated rv semi-amplitude) [km/s]")
 plt.ylabel("$\log_{10}$(inferred rv semi-amplitude) [km/s]")
-plt.savefig("infer_sigma.pdf", bbox_inches="tight")
+plt.savefig(paths.figures / "infer_sigma.pdf", bbox_inches="tight")

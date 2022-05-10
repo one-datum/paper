@@ -1,4 +1,5 @@
 \documentclass[modern, letterpaper]{aastex631}
+\usepackage{showyourwork}
 
 \usepackage{microtype}
 \usepackage{amsmath}
@@ -139,6 +140,7 @@ This is not, however, a number that we have access to.
 Instead, in the next section we derive a hierarchical model for determining a calibrated data-driven estimate of $\sigma_n$, as a function of color and apparent magnitude, based on the published EDR3 catalog.
 
 \begin{figure}
+	\script{infer_sigma.py}
 	\begin{centering}
 		\includegraphics[width=0.8\textwidth]{figures/infer_sigma_data.pdf}
 		\caption{The distribution of RV sample variance ${s}^2$ for a simulated population of binary stars observed by \Gaia\ (unfilled histogram), compared to the distribution that would have been observed in the absence of companions (shaded histogram).
@@ -190,6 +192,7 @@ In most cases, the orbits are far from well-sampled.
 This helps to demonstrate that the accuracy of our inference procedure is not significantly affected by our simplifying assumptions.
 
 \begin{figure}
+	\script{infer_sigma.py}
 	\begin{centering}
 		\includegraphics[width=0.8\textwidth]{figures/infer_sigma.pdf}
 		\caption{For the simulated \Gaia\ catalog from \autoref{fig:infer_sigma:data}, this figure shows the recovered RV semi-amplitude for each simulated target, as a function of its true semi-amplitude.
@@ -207,6 +210,7 @@ For targets outside the well sampled regime, our estimate of $\sigma_n$ is extra
 \autoref{fig:noise_model} shows that the \Gaia\ RV spectrograph can reach a precision of better than $300\,\mathrm{m\,s^{-1}}$ for the brightest targets, with more typical values being of order $1\,\mathrm{km\,s^{-1}}$.
 
 \begin{figure}
+	\script{noise_model.py}
 	\begin{centering}
 		\includegraphics[width=0.8\textwidth]{figures/noise_model.pdf}
 		\caption{The estimated per-transit \Gaia\ RV measurement uncertainty as a function of color and magnitude.
@@ -221,6 +225,7 @@ DO WE WANT TO SAY ANYTHING ELSE?
 ARC: What about the brightest stars (say apparent magnitude less than 6). There are very few stars here, but some people are really interested in these for binarity / young stars / etc. Gaia has some saturating issues at these brightnesses. When combined with the low sample sizes, it makes it pointless to do anything here. Should we mention this?
 
 \begin{figure}
+	\script{sigma_cmd.py}
 	\begin{centering}
 		\includegraphics[width=0.8\textwidth]{figures/sigma_cmd.pdf}
 		\caption{The average per-transit RV uncertainty across the color--magnitude diagram.
@@ -263,6 +268,7 @@ In the absence of other sources of noise\footnote{We discuss these other noise s
 With this interpretation, this figure shows some expected structures such as an equal-mass main sequence and an increased binary fraction at higher mass.
 
 \begin{figure}
+	\script{p_value_dist.py}
 	\begin{centering}
 		\includegraphics[width=0.8\textwidth]{figures/p_value_dist.pdf}
 		\caption{The distribution of $p$-values across the full sample. In the absence of outliers, we would expect to find the distribution shown as a dashed orange line. ARC: The orange line looks to be at $p \approx$0.7, but shouldn't we expect it at 1.0?}
@@ -271,6 +277,7 @@ With this interpretation, this figure shows some expected structures such as an 
 \end{figure}
 
 \begin{figure}
+	\script{binary_fraction_cmd.py}
 	\begin{centering}
 		\includegraphics[width=0.8\textwidth]{figures/binary_fraction_cmd.pdf}
 		\caption{Like \autoref{fig:sigma_cmd}, but this time the color bar shows the fraction of targets with a $p$-value less than 0.001. This is an estimate of the fraction of \Gaia\ targets that are detectable multiple star systems as a function of color and magnitude. In other words, this can (with the appropriate caveats) be interpreted as the binary fraction across the color--magnitude diagram. Under this interpretation, the equal-mass binary main sequence is clearly visible, and there is an increased binary fraction above the main sequence turn-off, where blue straggler stars are typically observed.}
@@ -385,6 +392,7 @@ For example, this result assumes that the per-transit RV uncertainty is correctl
 % \end{figure}
 
 \begin{figure}
+	\script{completeness.py}
 	\begin{centering}
 		\includegraphics[width=\textwidth]{figures/completeness.pdf}
 		\caption{The fraction of simulated binary systems that we recover as a function of its RV semi-amplitude, per-transit RV measurement uncertainty, and the number of RV transits. Unsurprisingly, a larger fraction of these systems are recovered when a target is observed more frequently with smaller measurement uncertainty. Our method is not sensitive to binaries with small semi-amplitudes, since these are indistinguishable from noise, but (perhaps surprisingly) it is also not sensitive to systems with large RV semi-amplitudes since these are likely to be explicitly removed from the catalog because of the large RV error.}
